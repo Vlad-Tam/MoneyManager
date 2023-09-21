@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
@@ -8,46 +9,46 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="350.0" prefWidth="550.0" style="-fx-background-color: #444;" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="350.0" prefWidth="550.0" style="-fx-background-color: #444;" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1"  fx:controller="com.example.moneymanager.SignUpController">
    <children>
-      <Text fill="#f1f4d5" layoutX="36.0" layoutY="120.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Money">
+      <Text fill="#f1f4d5" layoutX="36.0" layoutY="112.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Money">
          <font>
             <Font name="Arial Rounded MT Bold" size="64.0" />
          </font>
       </Text>
-      <Text fill="#eaff00" layoutX="240.0" layoutY="120.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Manager">
+      <Text fill="#eaff00" layoutX="240.0" layoutY="112.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Manager">
          <font>
             <Font name="Arial Rounded MT Bold" size="64.0" />
          </font>
       </Text>
-      <TextField layoutX="166.0" layoutY="146.0" prefHeight="26.0" prefWidth="218.0" promptText="Username" style="-fx-background-color: #555555;" />
-      <TextField layoutX="166.0" layoutY="234.0" prefHeight="26.0" prefWidth="217.0" promptText="Password" style="-fx-background-color: #555555;" />
-      <Button layoutX="444.0" layoutY="14.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="92.0" style="-fx-background-color: #555555; -fx-border-color: #FFFFFF;" text="Sign in" textFill="#b9b8b8" />
-      <Button layoutX="164.0" layoutY="276.0" mnemonicParsing="false" prefHeight="43.0" prefWidth="218.0" style="-fx-background-color: #888888; -fx-border-color: #EAFF00; -fx-border-width: 2;" text="Sign UP">
+      <TextField fx:id="username" layoutX="166.0" layoutY="138.0" prefHeight="26.0" prefWidth="218.0" promptText="Username" style="-fx-background-color: #555555;" />
+      <Button fx:id="login" layoutX="444.0" layoutY="14.0" mnemonicParsing="false" onAction="#loginAction" prefHeight="37.0" prefWidth="92.0" style="-fx-background-color: #555555; -fx-border-color: #FFFFFF;" text="Login" textFill="#b9b8b8" />
+      <Button fx:id="signUp" layoutX="164.0" layoutY="268.0" mnemonicParsing="false" onAction="#signUpAction" prefHeight="43.0" prefWidth="218.0" style="-fx-background-color: #888888; -fx-border-color: #EAFF00; -fx-border-width: 2;" text="Sign UP">
          <font>
             <Font size="18.0" />
          </font>
       </Button>
-      <ImageView fitHeight="43.0" fitWidth="41.0" layoutX="88.0" layoutY="83.0" pickOnBounds="true" preserveRatio="true" rotate="-38.3">
+      <ImageView fitHeight="43.0" fitWidth="41.0" layoutX="88.0" layoutY="75.0" pickOnBounds="true" preserveRatio="true" rotate="-38.3">
          <image>
             <Image url="@../../../../../../../../../../Studying/1-removebg-preview.png" />
          </image>
       </ImageView>
-      <ImageView fitHeight="32.0" fitWidth="58.0" layoutX="109.0" layoutY="143.0" pickOnBounds="true" preserveRatio="true">
+      <ImageView fitHeight="32.0" fitWidth="58.0" layoutX="109.0" layoutY="135.0" pickOnBounds="true" preserveRatio="true">
          <image>
             <Image url="@../../../../../../../../../../Studying/2-removebg-preview.png" />
          </image>
       </ImageView>
-      <ImageView fitHeight="26.0" fitWidth="32.0" layoutX="124.0" layoutY="234.0" pickOnBounds="true" preserveRatio="true">
+      <ImageView fitHeight="26.0" fitWidth="32.0" layoutX="124.0" layoutY="226.0" pickOnBounds="true" preserveRatio="true">
          <image>
             <Image url="@../../../../../../../../../../Studying/3.png" />
          </image>
       </ImageView>
-      <TextField layoutX="166.0" layoutY="190.0" prefHeight="26.0" prefWidth="218.0" promptText="Login/email" style="-fx-background-color: #555555;" />
-      <ImageView fitHeight="32.0" fitWidth="58.0" layoutX="121.0" layoutY="187.0" pickOnBounds="true" preserveRatio="true">
+      <TextField fx:id="email" layoutX="166.0" layoutY="182.0" prefHeight="26.0" prefWidth="218.0" promptText="Login/email" style="-fx-background-color: #555555;" />
+      <ImageView fitHeight="32.0" fitWidth="58.0" layoutX="121.0" layoutY="179.0" pickOnBounds="true" preserveRatio="true">
          <image>
             <Image url="@../../../../../../../../../../Studying/4-removebg-preview.png" />
          </image>
       </ImageView>
+      <PasswordField fx:id="password" layoutX="164.0" layoutY="226.0" prefWidth="218.0" promptText="Password" style="-fx-background-color: #555555;" />
    </children>
 </AnchorPane>
