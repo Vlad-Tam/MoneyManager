@@ -1,36 +1,139 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
+<?import javafx.scene.text.TextFlow?>
 
 <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" style="-fx-background-color: #555555;" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.moneymanager.MainWindowController">
    <children>
-      <AnchorPane prefHeight="60.0" prefWidth="550.0" style="-fx-background-color: #444444;">
-         <children>
-            <Text fill="#f1f4d5" layoutX="8.0" layoutY="42.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Money">
-               <font>
-                  <Font name="Arial Rounded MT Bold" size="36.0" />
-               </font>
-            </Text>
-            <Text fill="#eaff00" layoutX="122.0" layoutY="41.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Manager">
-               <font>
-                  <Font name="Arial Rounded MT Bold" size="36.0" />
-               </font>
-            </Text>
-            <ImageView fitHeight="23.0" fitWidth="23.0" layoutX="37.0" layoutY="21.0" pickOnBounds="true" preserveRatio="true" rotate="-45.0">
-               <image>
-                  <Image url="@../../../../../../../../../../Studying/1-removebg-preview.png" />
-               </image>
-            </ImageView>
-         </children>
-      </AnchorPane>
-      <AnchorPane layoutX="10.0" layoutY="70.0" prefHeight="160.0" prefWidth="260.0" style="-fx-background-color: #444444; -fx-background-radius: 10px;" />
-      <AnchorPane layoutX="280.0" layoutY="70.0" prefHeight="160.0" prefWidth="260.0" style="-fx-background-color: #444444; -fx-background-radius: 10px;" />
-      <AnchorPane layoutX="10.0" layoutY="240.0" prefHeight="160.0" prefWidth="260.0" style="-fx-background-color: #444444; -fx-background-radius: 10px;" />
-      <AnchorPane layoutX="280.0" layoutY="240.0" prefHeight="160.0" prefWidth="260.0" style="-fx-background-color: #444444; -fx-background-radius: 10px;" />
       <AnchorPane layoutY="400.0" prefHeight="10.0" prefWidth="550.0" />
+      <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <top>
+            <AnchorPane prefHeight="60.0" prefWidth="550.0" style="-fx-background-color: #444444;" BorderPane.alignment="CENTER">
+               <children>
+                  <Text fill="#f1f4d5" layoutX="8.0" layoutY="42.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Money">
+                     <font>
+                        <Font name="Arial Rounded MT Bold" size="36.0" />
+                     </font>
+                  </Text>
+                  <Text fill="#eaff00" layoutX="122.0" layoutY="41.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Manager">
+                     <font>
+                        <Font name="Arial Rounded MT Bold" size="36.0" />
+                     </font>
+                  </Text>
+                  <ImageView fitHeight="23.0" fitWidth="23.0" layoutX="37.0" layoutY="21.0" pickOnBounds="true" preserveRatio="true" rotate="-45.0">
+                     <image>
+                        <Image url="@../../../../../../../../../../Studying/1-removebg-preview.png" />
+                     </image>
+                  </ImageView>
+                  <AnchorPane layoutX="558.0" layoutY="-72.0" prefWidth="60.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                        <Button fx:id="settingsButton" contentDisplay="TOP" graphicTextGap="0.0" layoutX="4.0" layoutY="18.0" mnemonicParsing="false" style="-fx-background-color: #555555; -fx-border-color: #ffffff;" text="≡" textFill="WHITE" wrapText="true" AnchorPane.bottomAnchor="7.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="7.0">
+                           <font>
+                              <Font name="Britannic Bold" size="25.0" />
+                           </font>
+                        </Button>
+                     </children>
+                  </AnchorPane>
+               </children>
+            </AnchorPane>
+         </top>
+         <center>
+            <GridPane BorderPane.alignment="CENTER">
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="10.0" minWidth="10.0" prefWidth="10.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                <RowConstraints maxHeight="10.0" minHeight="10.0" prefHeight="10.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <AnchorPane prefHeight="160.0" prefWidth="260.0" style="-fx-background-color: #444444; -fx-background-radius: 10px;">
+                     <children>
+                        <AnchorPane layoutX="90.0" layoutY="-86.0" prefHeight="30.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <children>
+                              <TextFlow layoutX="90.0" layoutY="-86.0" textAlignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
+                                 <children>
+                                    <Text boundsType="VISUAL" fill="#eaff00" strokeType="OUTSIDE" strokeWidth="0.0" text="Expences by categories" textAlignment="CENTER" textOrigin="BOTTOM" wrappingWidth="167.69695854187012">
+                                       <font>
+                                          <Font size="18.0" />
+                                       </font>
+                                    </Text>
+                                 </children>
+                              </TextFlow>
+                           </children>
+                        </AnchorPane>
+                     </children></AnchorPane>
+                  <AnchorPane prefHeight="160.0" prefWidth="260.0" style="-fx-background-color: #444444; -fx-background-radius: 10px;" GridPane.columnIndex="2">
+                     <GridPane.margin>
+                        <Insets />
+                     </GridPane.margin>
+                     <children>
+                        <AnchorPane layoutY="-10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="200.0" AnchorPane.topAnchor="0.0">
+                           <children>
+                              <LineChart blendMode="OVERLAY" layoutX="-148.0" layoutY="-99.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="7.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
+                                <xAxis>
+                                  <CategoryAxis prefHeight="9.0" prefWidth="164.0" />
+                                </xAxis>
+                                <yAxis>
+                                  <NumberAxis blendMode="MULTIPLY" prefHeight="140.0" prefWidth="9.0" side="LEFT" tickLabelFill="WHITE" />
+                                </yAxis>
+                              </LineChart>
+                           </children>
+                        </AnchorPane>
+                        <AnchorPane layoutX="140.0" layoutY="-86.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="30.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <children>
+                              <TextFlow layoutX="102.0" layoutY="-82.0" textAlignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
+                                 <children>
+                                    <Text fill="#eaff00" strokeType="OUTSIDE" strokeWidth="0.0" text="Last month expences">
+                                       <font>
+                                          <Font size="18.0" />
+                                       </font>
+                                    </Text>
+                                 </children>
+                              </TextFlow>
+                           </children>
+                        </AnchorPane>
+                     </children>
+                  </AnchorPane>
+                  <AnchorPane prefHeight="160.0" prefWidth="260.0" style="-fx-background-color: #444444; -fx-background-radius: 10px;" GridPane.rowIndex="2">
+                     <children>
+                        <AnchorPane layoutX="30.0" layoutY="-86.0" prefHeight="30.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <children>
+                              <TextFlow layoutX="30.0" layoutY="-86.0" textAlignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
+                                 <children>
+                                    <Text fill="#eaff00" strokeType="OUTSIDE" strokeWidth="0.0" text="Expences by time" textAlignment="CENTER">
+                                       <font>
+                                          <Font size="18.0" />
+                                       </font>
+                                    </Text>
+                                 </children>
+                              </TextFlow>
+                           </children>
+                        </AnchorPane>
+                     </children></AnchorPane>
+                  <AnchorPane prefHeight="160.0" prefWidth="260.0" style="-fx-background-color: #444444; -fx-background-radius: 10px;" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+               </children>
+               <padding>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </padding>
+            </GridPane>
+         </center>
+      </BorderPane>
    </children>
 </AnchorPane>

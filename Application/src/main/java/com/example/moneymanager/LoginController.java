@@ -17,13 +17,14 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
+import java.util.Scanner;
 
 public class LoginController implements Initializable {
 
@@ -57,9 +58,13 @@ public class LoginController implements Initializable {
     @FXML
     private Text notCorrectAlert;
 
+    @FXML
+    private CheckBox rememberMeBox;
+
     private Connection connection;
     private DBHandler handler;
     private PreparedStatement pst;
+    private boolean rememberMe;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -69,6 +74,48 @@ public class LoginController implements Initializable {
         email.setStyle("-fx-background-color: #555555; -fx-text-fill: #b9b8b8");
         password.setStyle("-fx-background-color: #555555; -fx-text-fill: #b9b8b8");
         handler = new DBHandler();
+
+        try {
+            email.requestFocus();
+            String path = new File(".").getCanonicalPath();
+            File file = new File(path + File.separator + "RememberMe.txt");
+            Scanner scanner = new Scanner(file);
+            String buffEmail = "", buffPassword = "";
+            if(scanner.hasNextLine()) {
+                buffEmail = scanner.nextLine();
+            }
+            if(scanner.hasNextLine()) {
+                buffPassword = scanner.nextLine();
+            }
+            scanner.close();
+            if(buffEmail != "" && buffPassword != ""){
+                email.requestFocus();
+                email.requestFocus();
+                email.setText(buffEmail);
+                email.requestFocus();
+                password.setText(buffPassword);;
+                rememberMeBox.setSelected(true);
+                rememberMe = true;
+
+                ActionEvent e = null;
+                loginAction(e);
+            }else{
+                rememberMeBox.setSelected(false);
+                rememberMe = false;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        rememberMeBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if(newValue){
+                System.out.println("Yes");
+                rememberMe = true;
+            }else{
+                System.out.println("No");
+                rememberMe = false;
+            }
+        });
     }
 
     @FXML
@@ -79,17 +126,53 @@ public class LoginController implements Initializable {
         PauseTransition pt = new PauseTransition();
         pt.setDuration(Duration.seconds(2));
         pt.setOnFinished(ev ->{
-            connection = handler.getConnection();
-            String request = "SELECT * from users where email=? and password=?";
+
             try {
+                String path = new File(".").getCanonicalPath();
+                //File file = new File(path + File.separator + "RememberMe.txt");
+                //Scanner scanner = new Scanner(file);
+                //String buffEmail = "", buffPassword = "";
+                //if(scanner.hasNextLine()) {
+                //    buffEmail = scanner.nextLine();
+                //}
+                //if(scanner.hasNextLine()) {
+                //    buffPassword = scanner.nextLine();
+                //}
+                //scanner.close();
+                //if(buffEmail == "" || buffPassword == ""){
+                //    buffEmail = email.getText();
+                //    buffPassword = password.getText();
+                //}else{
+                //    email.setText(buffEmail);
+                //    password.setText(buffEmail);
+                //}
+
+                connection = handler.getConnection();
+                String request = "SELECT * from users where email=? and password=?";
                 pst = connection.prepareStatement(request);
-                pst.setString(1, email.getText());
-                pst.setString(2, password.getText());
+                String buffEmail, buffPassword;
+                buffEmail = email.getText();
+                buffPassword = password.getText();
+                pst.setString(1, buffEmail);
+                pst.setString(2, buffPassword);
                 ResultSet rs = pst.executeQuery();
                 if(rs.next()){
                     System.out.println("Login successful");
                     progress.setVisible(false);
                     successAlert.setVisible(true);
+                    try {
+                        FileWriter writer;
+                        if(rememberMe == true){
+                            writer = new FileWriter(path + File.separator + "RememberMe.txt");
+                            writer.write(buffEmail + "\n");
+                            writer.write(buffPassword + "\n");
+                        }else{
+                            writer = new FileWriter(path + File.separator + "RememberMe.txt", false);
+                        }
+                        writer.close();
+                    }catch (IOException e1){
+                        e1.printStackTrace();
+                    }
                     PauseTransition pt1 = new PauseTransition();
                     pt1.setDuration(Duration.seconds(1));
                     pt1.setOnFinished(ev1 -> {
@@ -98,8 +181,9 @@ public class LoginController implements Initializable {
                         try{
                             Parent root = FXMLLoader.load(getClass().getResource("MainWindow.fxml"));
                             Scene scene = new Scene(root);
+                            homeStage.setMaximized(true);
                             homeStage.setScene(scene);
-                            homeStage.setTitle("Home");
+                            homeStage.setTitle("MoneyManager v1.5");
                             homeStage.show();
                         }catch(IOException e1){
                             e1.printStackTrace();
@@ -114,6 +198,10 @@ public class LoginController implements Initializable {
                 connection.close();
             }catch (SQLException e1){
                 e1.printStackTrace();
+            } catch (FileNotFoundException e2) {
+                e2.printStackTrace();
+            } catch (IOException e3) {
+                e3.printStackTrace();
             }
         });
         pt.play();
