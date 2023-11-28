@@ -92,7 +92,7 @@ public class SignUpController implements Initializable {
         PauseTransition pt = new PauseTransition();
         pt.setDuration(Duration.seconds(2));
         pt.setOnFinished(ev ->{
-            String insert = "INSERT INTO users(name,email,password)" + "VALUES (?,?,?)";
+            String insert = "INSERT INTO users(name,email,password,balance,monthLimit)" + "VALUES (?,?,?,?,?)";
             connection = handler.getConnection();
             try {
                 String buffEmail = email.getText();
@@ -107,6 +107,8 @@ public class SignUpController implements Initializable {
                 pst.setString(1, username.getText());
                 pst.setString(2, email.getText());
                 pst.setString(3, password.getText());
+                pst.setString(4, "0");
+                pst.setString(5, "1500");
                 pst.executeUpdate();
                 progress.setVisible(false);
 

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="450.0" style="-fx-background-color: #444;" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Text fill="#f1f4d5" layoutX="35.0" layoutY="130.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Desktop application “MoneyManager”" wrappingWidth="1742.466796875">
+         <font>
+            <Font size="16.0" />
+         </font>
+      </Text>
+      <Text fill="#f1f4d5" layoutX="35.0" layoutY="155.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Technologies stack: Java, JavaFX, JFoenix, MySQL.">
+         <font>
+            <Font size="16.0" />
+         </font>
+      </Text>
+      <Text fill="#f1f4d5" layoutX="35.0" layoutY="180.0" strokeType="OUTSIDE" strokeWidth="0.0" text="OS: Windows 10, 11">
+         <font>
+            <Font size="16.0" />
+         </font>
+      </Text>
+      <Text fill="#f1f4d5" layoutX="35.0" layoutY="205.0" strokeType="OUTSIDE" strokeWidth="0.0" text="The application is under development.">
+         <font>
+            <Font size="16.0" />
+         </font>
+      </Text>
+      <Text fill="#f1f4d5" layoutX="35.0" layoutY="230.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Developed by student of group 150501 Tamashenya V.">
+         <font>
+            <Font size="16.0" />
+         </font>
+      </Text>
+      <Text fill="#f1f4d5" layoutX="35.0" layoutY="255.0" strokeType="OUTSIDE" strokeWidth="0.0" text="v1.5">
+         <font>
+            <Font size="16.0" />
+         </font>
+      </Text>
+      <Text fill="#f1f4d5" layoutX="35.0" layoutY="72.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Money">
+         <font>
+            <Font name="Arial Rounded MT Bold" size="48.0" />
+         </font>
+      </Text>
+      <Text fill="#eaff00" layoutX="188.0" layoutY="73.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Manager">
+         <font>
+            <Font name="Arial Rounded MT Bold" size="48.0" />
+         </font>
+      </Text>
+      <ImageView fitHeight="32.0" fitWidth="28.0" layoutX="75.0" layoutY="45.0" pickOnBounds="true" preserveRatio="true" rotate="-45.0">
+         <image>
+            <Image url="@../../../../../../../../../../Studying/1-removebg-preview.png" />
+         </image>
+      </ImageView>
+   </children>
+</AnchorPane>

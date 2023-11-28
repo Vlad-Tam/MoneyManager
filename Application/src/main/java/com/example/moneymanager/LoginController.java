@@ -65,6 +65,7 @@ public class LoginController implements Initializable {
     private DBHandler handler;
     private PreparedStatement pst;
     private boolean rememberMe;
+    private static String saveEmail;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -129,24 +130,6 @@ public class LoginController implements Initializable {
 
             try {
                 String path = new File(".").getCanonicalPath();
-                //File file = new File(path + File.separator + "RememberMe.txt");
-                //Scanner scanner = new Scanner(file);
-                //String buffEmail = "", buffPassword = "";
-                //if(scanner.hasNextLine()) {
-                //    buffEmail = scanner.nextLine();
-                //}
-                //if(scanner.hasNextLine()) {
-                //    buffPassword = scanner.nextLine();
-                //}
-                //scanner.close();
-                //if(buffEmail == "" || buffPassword == ""){
-                //    buffEmail = email.getText();
-                //    buffPassword = password.getText();
-                //}else{
-                //    email.setText(buffEmail);
-                //    password.setText(buffEmail);
-                //}
-
                 connection = handler.getConnection();
                 String request = "SELECT * from users where email=? and password=?";
                 pst = connection.prepareStatement(request);
@@ -160,6 +143,7 @@ public class LoginController implements Initializable {
                     System.out.println("Login successful");
                     progress.setVisible(false);
                     successAlert.setVisible(true);
+                    saveEmail = buffEmail;
                     try {
                         FileWriter writer;
                         if(rememberMe == true){
@@ -179,11 +163,13 @@ public class LoginController implements Initializable {
                         login.getScene().getWindow().hide();
                         Stage homeStage = new Stage();
                         try{
-                            Parent root = FXMLLoader.load(getClass().getResource("MainWindow.fxml"));
-                            Scene scene = new Scene(root);
-                            homeStage.setMaximized(true);
+                            Parent root = FXMLLoader.load(getClass().getResource("MainWindowNew.fxml"));
+                            Scene scene = new Scene(root, 1000, 600);
+
+                            //homeStage.setMaximized(true);
                             homeStage.setScene(scene);
                             homeStage.setTitle("MoneyManager v1.5");
+                            homeStage.setResizable(false);
                             homeStage.show();
                         }catch(IOException e1){
                             e1.printStackTrace();
@@ -218,5 +204,9 @@ public class LoginController implements Initializable {
         signUp.setScene(scene);
         signUp.show();
         signUp.setResizable(false);
+    }
+
+    public static String getSaveEmail(){
+        return saveEmail;
     }
 }

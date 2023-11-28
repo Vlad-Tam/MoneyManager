@@ -1,0 +1,23 @@
+.chart-plot-background {
+    -fx-background-color: #000000;
+}
+.axis-label {
+    -fx-text-fill: #f1f4d5;
+}
+
+.axis-tick-label {
+    -fx-text-fill: #f1f4d5;
+}
+.chart-legend {
+    -fx-background-color: #000000;
+    -fx-font-size: 14px;
+}
+
+.chart-legend-item-symbol {
+    -fx-color: #ffffff;
+}
+
+.chart-line-symbol {
+    -fx-scale-x: 0.8;
+    -fx-scale-y: 0.8;
+}
