@@ -8,6 +8,10 @@ import com.jfoenix.controls.JFXRippler;
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -34,6 +38,7 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.*;
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.ResourceBundle;
@@ -51,16 +56,26 @@ public class MainWindowController implements Initializable{
     private int daysInMonth;
     private float monthExpenses;
     private float[] dateExpensesList;
+    private float[] monthExpensesList;
+    private float[] yearExpensesList;
+    private float[] dayCategoriesList;
+    private float[] monthCategoriesList;
+    private float[] yearCategoriesList;
     private float spentToday = 0;
 
     XYChart.Series series;
     XYChart.Series maxMonthExpenseSeries;
+    XYChart.Series barChartSeries;
+    ObservableList<PieChart.Data> pieChartData;
 
     @FXML
     private LineChart<?, ?> lineChart;
 
     @FXML
-    private BarChart<?, ?> barChartMonth;
+    private BarChart<?, ?> barChart;
+
+    @FXML
+    private PieChart pieChart;
 
     @FXML
     AnchorPane home;
@@ -107,7 +122,20 @@ public class MainWindowController implements Initializable{
     @FXML
     private TextField newLimitField;
 
+    @FXML
+    private ChoiceBox<String> deleteField;
 
+    @FXML
+    private RadioButton byDaysRadioButton;
+
+    @FXML
+    private RadioButton byMonthsRadioButton;
+
+    @FXML
+    private RadioButton byYearsRadioButton;
+
+    @FXML
+    private ToggleGroup expensesByTime;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -116,6 +144,12 @@ public class MainWindowController implements Initializable{
         categoryField.getStylesheets().add(getClass().getResource("inputFields.css").toExternalForm());
         dateField.getStylesheets().add(getClass().getResource("inputFields.css").toExternalForm());
         valueField.getStylesheets().add(getClass().getResource("inputFields.css").toExternalForm());
+        deleteField.getStylesheets().add(getClass().getResource("inputFields.css").toExternalForm());
+        newLimitField.getStylesheets().add(getClass().getResource("inputFields.css").toExternalForm());
+
+        byDaysRadioButton.setStyle("-fx-selected-color: #f1f4d5;");
+        byMonthsRadioButton.setStyle("-fx-selected-color: #f1f4d5;");
+        byYearsRadioButton.setStyle("-fx-selected-color: #f1f4d5;");
 
         dateField.setValue(LocalDate.now());
 
@@ -139,7 +173,6 @@ public class MainWindowController implements Initializable{
 
                 series = new XYChart.Series();
                 series.setName("Your month expenses");
-                //series.getData().add(new XYChart.Data("0", 0));
                 lineChart.getData().add(series);
                 maxMonthExpenseSeries = new XYChart.Series();
                 maxMonthExpenseSeries.setName("Expenses limit");
@@ -182,19 +215,44 @@ public class MainWindowController implements Initializable{
             ResultSet rs2 = pst2.executeQuery();
 
             this.dateExpensesList = new float[daysInMonth];
+            this.monthExpensesList = new float[12];
+            this.yearExpensesList = new float [10];
+            this.dayCategoriesList = new float[6];
+            this.monthCategoriesList = new float[6];
+            this.yearCategoriesList = new float[6];
+
             while(rs2.next()) {
-                String buffCategory = rs2.getString(3);
-                System.out.println("buffCategoryNum = " + buffCategory);
+                String buffCategoryNum = rs2.getString(3);
+                System.out.println("buffCategoryNum = " + buffCategoryNum);
                 java.sql.Date sqlDate = rs2.getDate(4);
                 LocalDate buffExpenseDate = sqlDate.toLocalDate();
                 String buffExpenseAmount = rs2.getString(5);
-                if(currentDate.getYear() == buffExpenseDate.getYear() && currentDate.getMonth() == buffExpenseDate.getMonth()){
-                    monthExpenses += Float.parseFloat(buffExpenseAmount);
-                    dateExpensesList[buffExpenseDate.getDayOfMonth() - 1] += Float.parseFloat(buffExpenseAmount);
-                    if(currentDate.getDayOfMonth() == buffExpenseDate.getDayOfMonth()){
-                        spentToday += Float.parseFloat(buffExpenseAmount);
+                yearExpensesList[buffExpenseDate.getYear() - 2020] += Float.parseFloat(buffExpenseAmount);
+                yearCategoriesList[Integer.parseInt(buffCategoryNum) - 1] += Float.parseFloat(buffExpenseAmount);
+                if(currentDate.getYear() == buffExpenseDate.getYear()){
+                    monthExpensesList[buffExpenseDate.getMonthValue() - 1] += Float.parseFloat(buffExpenseAmount);
+                    monthCategoriesList[Integer.parseInt(buffCategoryNum) - 1] += Float.parseFloat(buffExpenseAmount);
+                    if(currentDate.getMonth() == buffExpenseDate.getMonth()){
+                        monthExpenses += Float.parseFloat(buffExpenseAmount);
+                        dateExpensesList[buffExpenseDate.getDayOfMonth() - 1] += Float.parseFloat(buffExpenseAmount);
+                        dayCategoriesList[Integer.parseInt(buffCategoryNum) - 1] += Float.parseFloat(buffExpenseAmount);
+                        if (currentDate.getDayOfMonth() == buffExpenseDate.getDayOfMonth()) {
+                            spentToday += Float.parseFloat(buffExpenseAmount);
+                        }
                     }
                 }
+
+                String categoriesRequest3 = "SELECT * from categories where category_id = ?";
+                PreparedStatement pst3 = connection.prepareStatement(categoriesRequest3);
+                pst3.setInt(1, Integer.parseInt(buffCategoryNum));
+                ResultSet rs = pst3.executeQuery();
+                String buffCategoryName = "Other";
+                if(rs.next()) {
+                    buffCategoryName = rs.getString(3);
+                    System.out.println("buffCategoryName = " + buffCategoryName);
+                }
+                String expenseInfo = buffExpenseDate.toString() + " | " + buffCategoryName + " | " + buffExpenseAmount + "$";
+                deleteField.getItems().add(expenseInfo);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -206,11 +264,68 @@ public class MainWindowController implements Initializable{
             e.printStackTrace();
         }
 
+        //linechart
         float buffSum = 0;
         for(int i = 0; i < dateExpensesList.length; i++){
             buffSum += dateExpensesList[i];
             series.getData().add(new XYChart.Data("" + (i + 1), buffSum));
         }
+
+        //barchart
+        barChartSeries = new XYChart.Series();
+        barChartSeries.getData().clear();
+        pieChartData = FXCollections.observableArrayList();
+        pieChartData.clear();
+
+        if(byDaysRadioButton.isSelected()){
+            for(int i = 0; i < dateExpensesList.length; i++){
+                barChartSeries.getData().add(new XYChart.Data("" + (i + 1), dateExpensesList[i]));
+            }
+            for(int i = 0; i < dayCategoriesList.length; i++){
+                String buffCategoryString = switch (i){
+                    case 0 -> "Products";
+                    case 1 -> "Travel";
+                    case 2 -> "Entertainment";
+                    case 3 -> "Transport";
+                    case 4 -> "Technologies";
+                    default -> "Other";
+                };
+                pieChartData.add(new PieChart.Data(buffCategoryString, dayCategoriesList[i]));
+            }
+        }else if(byMonthsRadioButton.isSelected()){
+            for(int i = 0; i < monthExpensesList.length; i++){
+                barChartSeries.getData().add(new XYChart.Data(Month.of(i + 1).name().substring(0, 3) , monthExpensesList[i]));
+            }
+            for(int i = 0; i < monthCategoriesList.length; i++){
+                String buffCategoryString = switch (i){
+                    case 0 -> "Products";
+                    case 1 -> "Travel";
+                    case 2 -> "Entertainment";
+                    case 3 -> "Transport";
+                    case 4 -> "Technologies";
+                    default -> "Other";
+                };
+                pieChartData.add(new PieChart.Data(buffCategoryString, monthCategoriesList[i]));
+            }
+        }else if(byYearsRadioButton.isSelected()){
+            for(int i = 0; i<yearExpensesList.length; i++){
+                barChartSeries.getData().add(new XYChart.Data("" + (2020 + i), yearExpensesList[i]));
+            }
+            for(int i = 0; i < yearCategoriesList.length; i++){
+                String buffCategoryString = switch (i){
+                    case 0 -> "Products";
+                    case 1 -> "Travel";
+                    case 2 -> "Entertainment";
+                    case 3 -> "Transport";
+                    case 4 -> "Technologies";
+                    default -> "Other";
+                };
+                pieChartData.add(new PieChart.Data(buffCategoryString, yearCategoriesList[i]));
+            }
+        }
+        barChart.getData().add(barChartSeries);
+        pieChart.setData(pieChartData);
+
         spentTodayText.setText("Spent today " + spentToday + "$");
         spentTodayWarnText.setText("Spent today " + spentToday + "$");
         if(monthExpenses > maxMonthExpense){
@@ -225,6 +340,8 @@ public class MainWindowController implements Initializable{
 
         openMenu();
         categoryFieldEvent();
+        DeleteFieldEvent();
+        changeRadioButtonEvent();
     }
 
     private void categoryFieldEvent(){
@@ -234,6 +351,16 @@ public class MainWindowController implements Initializable{
 
             System.out.println("Selection made: [" + selectedIndex + "] " + selectedItem);
             System.out.println("ChoiceBox.getValue(): " + categoryField.getValue());
+        });
+    }
+
+    private void DeleteFieldEvent(){
+        deleteField.setOnAction((event) -> {
+            int selectedIndex = deleteField.getSelectionModel().getSelectedIndex();
+            String selectedItem = deleteField.getSelectionModel().getSelectedItem();
+
+            System.out.println("Selection made: [" + selectedIndex + "] " + selectedItem);
+            System.out.println("ChoiceBox.getValue(): " + deleteField.getValue());
         });
     }
 
@@ -258,84 +385,191 @@ public class MainWindowController implements Initializable{
         String buffValue = valueField.getText();
         LocalDate selectedDate = dateField.getValue();
 
-        if (buffValue.matches("^[0-9\\.]*$") && buffValue.length() != 0) {
-            System.out.println("buffValue = " + buffValue);
-
-            String insert = "INSERT INTO expenses(user_id,category_id,expense_date,expense_amount)" + "VALUES (?,?,?,?)";
-            try {
-                connection = handler.getConnection();
-                pst = connection.prepareStatement(insert);
-                pst.setString(1, "" + userId);
-                int catIdBuff = switch (buffCategory){
-                    case "Products" -> 1;
-                    case "Travel" -> 2;
-                    case "Entertainment" -> 3;
-                    case "Transport" -> 4;
-                    case "Technologies" -> 5;
-                    default -> 6;
-                };
-                pst.setString(2, "" + catIdBuff);
-                pst.setString(3, selectedDate.toString());
-                pst.setString(4, buffValue);
-                pst.executeUpdate();
-
-                series.getData().clear();
-
-                String expensesRequest = "SELECT * from expenses where user_id=?";
-                PreparedStatement pst;
-                pst = connection.prepareStatement(expensesRequest);
-                pst.setInt(1, userId);
-                ResultSet rs = pst.executeQuery();
-
-                for(int i = 0; i < dateExpensesList.length; i++){
-                    dateExpensesList[i] = 0;
-                }
-                spentToday = 0;
-                monthExpenses = 0;
-
-                while(rs.next()) {
-                    String buffCategoryNum = rs.getString(3);
-                    System.out.println("buffCategoryNum = " + buffCategoryNum);
-                    java.sql.Date sqlDate = rs.getDate(4);
-                    LocalDate buffExpenseDate = sqlDate.toLocalDate();
-                    String buffExpenseAmount = rs.getString(5);
-                    if(currentDate.getYear() == buffExpenseDate.getYear() && currentDate.getMonth() == buffExpenseDate.getMonth()){
-                        monthExpenses += Float.parseFloat(buffExpenseAmount);
-                        dateExpensesList[buffExpenseDate.getDayOfMonth() - 1] += Float.parseFloat(buffExpenseAmount);
-                        if(currentDate.getDayOfMonth() == buffExpenseDate.getDayOfMonth()){
-                            spentToday += Float.parseFloat(buffExpenseAmount);
-                        }
-                    }
-                }
-                connection.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-
-            float buffSum = 0;
-            for(int i = 0; i < dateExpensesList.length; i++){
-                buffSum += dateExpensesList[i];
-                series.getData().add(new XYChart.Data("" + (i + 1), buffSum));
-            }
-            spentTodayText.setText("Spent today " + spentToday + "$");
-            spentTodayWarnText.setText("Spent today " + spentToday + "$");
-            if(monthExpenses > maxMonthExpense){
-                spentTodayText.setVisible(false);
-                spentTodayWarnText.setVisible(true);
-                monthLimitWarnText.setVisible(true);
-            }else{
-                spentTodayText.setVisible(true);
-                spentTodayWarnText.setVisible(false);
-                monthLimitWarnText.setVisible(false);
-            }
-
-        } else {
+        if(selectedDate.getYear() > 2029 || selectedDate.getYear() < 2020){
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("Input error");
             alert.setHeaderText(null);
-            alert.setContentText("Invalid value entered. Please enter a number.");
+            alert.setContentText("Invalid value entered. Please enter year from 2020 to 2029.");
             alert.getDialogPane().getStylesheets().add(Main.class.getResource("alert.css").toExternalForm());
             alert.showAndWait();
+        }else {
+            if (buffValue.matches("^[0-9\\.]*$") && buffValue.length() != 0) {
+                System.out.println("buffValue = " + buffValue);
+
+                String insert = "INSERT INTO expenses(user_id,category_id,expense_date,expense_amount)" + "VALUES (?,?,?,?)";
+                try {
+                    connection = handler.getConnection();
+                    pst = connection.prepareStatement(insert);
+                    pst.setString(1, "" + userId);
+                    int catIdBuff = switch (buffCategory) {
+                        case "Products" -> 1;
+                        case "Travel" -> 2;
+                        case "Entertainment" -> 3;
+                        case "Transport" -> 4;
+                        case "Technologies" -> 5;
+                        default -> 6;
+                    };
+                    pst.setString(2, "" + catIdBuff);
+                    pst.setString(3, selectedDate.toString());
+                    pst.setString(4, buffValue);
+                    pst.executeUpdate();
+
+                    series.getData().clear();
+
+                    String expensesRequest = "SELECT * from expenses where user_id=?";
+                    PreparedStatement pst;
+                    pst = connection.prepareStatement(expensesRequest);
+                    pst.setInt(1, userId);
+                    ResultSet rs = pst.executeQuery();
+
+                    for (int i = 0; i < dateExpensesList.length; i++) {
+                        dateExpensesList[i] = 0;
+                    }
+                    for (int i = 0; i < monthExpensesList.length; i++) {
+                        monthExpensesList[i] = 0;
+                    }
+                    for (int i = 0; i < yearExpensesList.length; i++) {
+                        yearExpensesList[i] = 0;
+                    }
+                    for (int i = 0; i < dayCategoriesList.length; i++) {
+                        dayCategoriesList[i] = 0;
+                    }
+                    for (int i = 0; i < monthCategoriesList.length; i++) {
+                        monthCategoriesList[i] = 0;
+                    }
+                    for (int i = 0; i < yearCategoriesList.length; i++) {
+                        yearCategoriesList[i] = 0;
+                    }
+                    spentToday = 0;
+                    monthExpenses = 0;
+                    deleteField.getItems().clear();
+
+                    while (rs.next()) {
+                        String buffCategoryNum = rs.getString(3);
+                        System.out.println("buffCategoryNum = " + buffCategoryNum);
+                        java.sql.Date sqlDate = rs.getDate(4);
+                        LocalDate buffExpenseDate = sqlDate.toLocalDate();
+                        String buffExpenseAmount = rs.getString(5);
+
+                        yearExpensesList[buffExpenseDate.getYear() - 2020] += Float.parseFloat(buffExpenseAmount);
+                        yearCategoriesList[Integer.parseInt(buffCategoryNum) - 1] += Float.parseFloat(buffExpenseAmount);
+                        if (currentDate.getYear() == buffExpenseDate.getYear()) {
+                            monthExpensesList[buffExpenseDate.getMonthValue() - 1] += Float.parseFloat(buffExpenseAmount);
+                            monthCategoriesList[Integer.parseInt(buffCategoryNum) - 1] += Float.parseFloat(buffExpenseAmount);
+                            if (currentDate.getMonth() == buffExpenseDate.getMonth()) {
+                                monthExpenses += Float.parseFloat(buffExpenseAmount);
+                                dateExpensesList[buffExpenseDate.getDayOfMonth() - 1] += Float.parseFloat(buffExpenseAmount);
+                                dayCategoriesList[Integer.parseInt(buffCategoryNum) - 1] += Float.parseFloat(buffExpenseAmount);
+                                if (currentDate.getDayOfMonth() == buffExpenseDate.getDayOfMonth()) {
+                                    spentToday += Float.parseFloat(buffExpenseAmount);
+                                }
+                            }
+                        }
+//                    yearExpensesList[buffExpenseDate.getYear() - 2020] += Float.parseFloat(buffExpenseAmount);
+//                    if(currentDate.getYear() == buffExpenseDate.getYear()){
+//                        monthExpensesList[buffExpenseDate.getMonthValue() - 1] += Float.parseFloat(buffExpenseAmount);
+//                        if(currentDate.getMonth() == buffExpenseDate.getMonth()){
+//                            monthExpenses += Float.parseFloat(buffExpenseAmount);
+//                            dateExpensesList[buffExpenseDate.getDayOfMonth() - 1] += Float.parseFloat(buffExpenseAmount);
+//                            if (currentDate.getDayOfMonth() == buffExpenseDate.getDayOfMonth()) {
+//                                spentToday += Float.parseFloat(buffExpenseAmount);
+//                            }
+//                        }
+//                    }
+                        //////////////////////////////////////////////////////////////////////////////
+                        String categoriesRequest3 = "SELECT * from categories where category_id = ?";
+                        PreparedStatement pst3 = connection.prepareStatement(categoriesRequest3);
+                        pst3.setInt(1, Integer.parseInt(buffCategoryNum));
+                        ResultSet rs2 = pst3.executeQuery();
+                        String buffCategoryName = "Other";
+                        if (rs2.next()) {
+                            buffCategoryName = rs2.getString(3);
+                            System.out.println("buffCategoryName = " + buffCategoryName);
+                        }
+                        String expenseInfo = buffExpenseDate.toString() + " | " + buffCategoryName + " | " + buffExpenseAmount + "$";
+                        deleteField.getItems().add(expenseInfo);
+                    }
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+                float buffSum = 0;
+                for (int i = 0; i < dateExpensesList.length; i++) {
+                    buffSum += dateExpensesList[i];
+                    series.getData().add(new XYChart.Data("" + (i + 1), buffSum));
+                }
+
+                //barchart piechart
+                barChartSeries.getData().clear();
+                pieChartData.clear();
+                if (byDaysRadioButton.isSelected()) {
+                    for (int i = 0; i < dateExpensesList.length; i++) {
+                        barChartSeries.getData().add(new XYChart.Data("" + (i + 1), dateExpensesList[i]));
+                    }
+                    for (int i = 0; i < dayCategoriesList.length; i++) {
+                        String buffCategoryString = switch (i) {
+                            case 0 -> "Products";
+                            case 1 -> "Travel";
+                            case 2 -> "Entertainment";
+                            case 3 -> "Transport";
+                            case 4 -> "Technologies";
+                            default -> "Other";
+                        };
+                        pieChartData.add(new PieChart.Data(buffCategoryString, dayCategoriesList[i]));
+                    }
+                } else if (byMonthsRadioButton.isSelected()) {
+                    for (int i = 0; i < monthExpensesList.length; i++) {
+                        barChartSeries.getData().add(new XYChart.Data(Month.of(i + 1).name().substring(0, 3), monthExpensesList[i]));
+                    }
+                    for (int i = 0; i < monthCategoriesList.length; i++) {
+                        String buffCategoryString = switch (i) {
+                            case 0 -> "Products";
+                            case 1 -> "Travel";
+                            case 2 -> "Entertainment";
+                            case 3 -> "Transport";
+                            case 4 -> "Technologies";
+                            default -> "Other";
+                        };
+                        pieChartData.add(new PieChart.Data(buffCategoryString, monthCategoriesList[i]));
+                    }
+                } else if (byYearsRadioButton.isSelected()) {
+                    for (int i = 0; i < yearExpensesList.length; i++) {
+                        barChartSeries.getData().add(new XYChart.Data("" + (2020 + i), yearExpensesList[i]));
+                    }
+                    for (int i = 0; i < yearCategoriesList.length; i++) {
+                        String buffCategoryString = switch (i) {
+                            case 0 -> "Products";
+                            case 1 -> "Travel";
+                            case 2 -> "Entertainment";
+                            case 3 -> "Transport";
+                            case 4 -> "Technologies";
+                            default -> "Other";
+                        };
+                        pieChartData.add(new PieChart.Data(buffCategoryString, yearCategoriesList[i]));
+                    }
+                }
+
+                spentTodayText.setText("Spent today " + spentToday + "$");
+                spentTodayWarnText.setText("Spent today " + spentToday + "$");
+                if (monthExpenses > maxMonthExpense) {
+                    spentTodayText.setVisible(false);
+                    spentTodayWarnText.setVisible(true);
+                    monthLimitWarnText.setVisible(true);
+                } else {
+                    spentTodayText.setVisible(true);
+                    spentTodayWarnText.setVisible(false);
+                    monthLimitWarnText.setVisible(false);
+                }
+
+            } else {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Input error");
+                alert.setHeaderText(null);
+                alert.setContentText("Invalid value entered. Please enter a number.");
+                alert.getDialogPane().getStylesheets().add(Main.class.getResource("alert.css").toExternalForm());
+                alert.showAndWait();
+            }
         }
         valueField.clear();
     }
@@ -384,7 +618,197 @@ public class MainWindowController implements Initializable{
 
     @FXML
     void deleteExpenseAction(ActionEvent event) {
+        String buffCategory = deleteField.getValue();
+        if (buffCategory != null) {
 
+            String[] parts = buffCategory.split("\\|");
+            String dateStr = parts[0].trim();
+            LocalDate localDateStr = LocalDate.parse(dateStr);
+            String categoriesStr = parts[1].trim();
+            String valueStr = parts[2].trim().replace("$", "");
+            float value = Float.parseFloat(valueStr);
+            int catIdBuff = switch (categoriesStr) {
+                case "Products" -> 1;
+                case "Travel" -> 2;
+                case "Entertainment" -> 3;
+                case "Transport" -> 4;
+                case "Technologies" -> 5;
+                default -> 6;
+            };
+
+            String deleteExpenseRequest = "SELECT * FROM expenses WHERE expense_date = ? AND expense_amount = ? AND category_id = ?";
+            try {
+                connection = handler.getConnection();
+                PreparedStatement pstmt = connection.prepareStatement(deleteExpenseRequest);
+                pstmt.setString(1, localDateStr.toString());
+                pstmt.setString(2, valueStr);
+                pstmt.setInt(3, catIdBuff);
+                ResultSet rs = pstmt.executeQuery();
+
+                if (rs.next()) {
+                    int idToDelete = rs.getInt(1);
+                    String deleteRequest = "DELETE FROM expenses WHERE expense_id = ?";
+                    PreparedStatement deleteStmt = connection.prepareStatement(deleteRequest);
+                    deleteStmt.setInt(1, idToDelete);
+                    deleteStmt.executeUpdate();
+                }
+
+
+                String expensesRequest = "SELECT * from expenses where user_id=?";
+                PreparedStatement pst;
+                pst = connection.prepareStatement(expensesRequest);
+                pst.setInt(1, userId);
+                ResultSet rs2 = pst.executeQuery();
+
+                for (int i = 0; i < dateExpensesList.length; i++) {
+                    dateExpensesList[i] = 0;
+                }
+                for (int i = 0; i < monthExpensesList.length; i++) {
+                    monthExpensesList[i] = 0;
+                }
+                for (int i = 0; i < yearExpensesList.length; i++) {
+                    yearExpensesList[i] = 0;
+                }
+                for (int i = 0; i < dayCategoriesList.length; i++) {
+                    dayCategoriesList[i] = 0;
+                }
+                for (int i = 0; i < monthCategoriesList.length; i++) {
+                    monthCategoriesList[i] = 0;
+                }
+                for (int i = 0; i < yearCategoriesList.length; i++) {
+                    yearCategoriesList[i] = 0;
+                }
+
+                spentToday = 0;
+                monthExpenses = 0;
+                deleteField.getItems().clear();
+                while (rs2.next()) {
+                    String buffCategoryNum = rs2.getString(3);
+                    System.out.println("buffCategoryNum = " + buffCategoryNum);
+                    java.sql.Date sqlDate = rs2.getDate(4);
+                    LocalDate buffExpenseDate = sqlDate.toLocalDate();
+                    String buffExpenseAmount = rs2.getString(5);
+
+                    yearExpensesList[buffExpenseDate.getYear() - 2020] += Float.parseFloat(buffExpenseAmount);
+                    yearCategoriesList[Integer.parseInt(buffCategoryNum) - 1] += Float.parseFloat(buffExpenseAmount);
+                    if(currentDate.getYear() == buffExpenseDate.getYear()){
+                        monthExpensesList[buffExpenseDate.getMonthValue() - 1] += Float.parseFloat(buffExpenseAmount);
+                        monthCategoriesList[Integer.parseInt(buffCategoryNum) - 1] += Float.parseFloat(buffExpenseAmount);
+                        if(currentDate.getMonth() == buffExpenseDate.getMonth()){
+                            monthExpenses += Float.parseFloat(buffExpenseAmount);
+                            dateExpensesList[buffExpenseDate.getDayOfMonth() - 1] += Float.parseFloat(buffExpenseAmount);
+                            dayCategoriesList[Integer.parseInt(buffCategoryNum) - 1] += Float.parseFloat(buffExpenseAmount);
+                            if (currentDate.getDayOfMonth() == buffExpenseDate.getDayOfMonth()) {
+                                spentToday += Float.parseFloat(buffExpenseAmount);
+                            }
+                        }
+                    }
+//                    yearExpensesList[buffExpenseDate.getYear() - 2020] += Float.parseFloat(buffExpenseAmount);
+//                    if(currentDate.getYear() == buffExpenseDate.getYear()){
+//                        monthExpensesList[buffExpenseDate.getMonthValue() - 1] += Float.parseFloat(buffExpenseAmount);
+//                        if(currentDate.getMonth() == buffExpenseDate.getMonth()){
+//                            monthExpenses += Float.parseFloat(buffExpenseAmount);
+//                            dateExpensesList[buffExpenseDate.getDayOfMonth() - 1] += Float.parseFloat(buffExpenseAmount);
+//                            if (currentDate.getDayOfMonth() == buffExpenseDate.getDayOfMonth()) {
+//                                spentToday += Float.parseFloat(buffExpenseAmount);
+//                            }
+//                        }
+//                    }
+                    String categoriesRequest3 = "SELECT * from categories where category_id = ?";
+                    PreparedStatement pst3 = connection.prepareStatement(categoriesRequest3);
+                    pst3.setInt(1, Integer.parseInt(buffCategoryNum));
+                    ResultSet rs3 = pst3.executeQuery();
+                    String buffCategoryName = "Other";
+                    if (rs3.next()) {
+                        buffCategoryName = rs3.getString(3);
+                        System.out.println("buffCategoryName = " + buffCategoryName);
+                    }
+                    String expenseInfo = buffExpenseDate.toString() + " | " + buffCategoryName + " | " + buffExpenseAmount + "$";
+                    deleteField.getItems().add(expenseInfo);
+                }
+                connection.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            //linechart
+            series.getData().clear();
+            float buffSum = 0;
+            for (int i = 0; i < dateExpensesList.length; i++) {
+                buffSum += dateExpensesList[i];
+                series.getData().add(new XYChart.Data("" + (i + 1), buffSum));
+            }
+
+            //barchart piechart
+            barChartSeries.getData().clear();
+            pieChartData.clear();
+            if(byDaysRadioButton.isSelected()){
+                for(int i = 0; i < dateExpensesList.length; i++){
+                    barChartSeries.getData().add(new XYChart.Data("" + (i + 1), dateExpensesList[i]));
+                }
+                for(int i = 0; i < dayCategoriesList.length; i++){
+                    String buffCategoryString = switch (i){
+                        case 0 -> "Products";
+                        case 1 -> "Travel";
+                        case 2 -> "Entertainment";
+                        case 3 -> "Transport";
+                        case 4 -> "Technologies";
+                        default -> "Other";
+                    };
+                    pieChartData.add(new PieChart.Data(buffCategoryString, dayCategoriesList[i]));
+                }
+            }else if(byMonthsRadioButton.isSelected()){
+                for(int i = 0; i < monthExpensesList.length; i++){
+                    barChartSeries.getData().add(new XYChart.Data(Month.of(i + 1).name().substring(0, 3) , monthExpensesList[i]));
+                }
+                for(int i = 0; i < monthCategoriesList.length; i++){
+                    String buffCategoryString = switch (i){
+                        case 0 -> "Products";
+                        case 1 -> "Travel";
+                        case 2 -> "Entertainment";
+                        case 3 -> "Transport";
+                        case 4 -> "Technologies";
+                        default -> "Other";
+                    };
+                    pieChartData.add(new PieChart.Data(buffCategoryString, monthCategoriesList[i]));
+                }
+            }else if(byYearsRadioButton.isSelected()){
+                for(int i = 0; i<yearExpensesList.length; i++){
+                    barChartSeries.getData().add(new XYChart.Data("" + (2020 + i), yearExpensesList[i]));
+                }
+                for(int i = 0; i < monthCategoriesList.length; i++){
+                    String buffCategoryString = switch (i){
+                        case 0 -> "Products";
+                        case 1 -> "Travel";
+                        case 2 -> "Entertainment";
+                        case 3 -> "Transport";
+                        case 4 -> "Technologies";
+                        default -> "Other";
+                    };
+                    pieChartData.add(new PieChart.Data(buffCategoryString, monthCategoriesList[i]));
+                }
+            }
+            //barChart.getData().add(barChartSeries);
+
+            spentTodayText.setText("Spent today " + spentToday + "$");
+            spentTodayWarnText.setText("Spent today " + spentToday + "$");
+            if (monthExpenses > maxMonthExpense) {
+                spentTodayText.setVisible(false);
+                spentTodayWarnText.setVisible(true);
+                monthLimitWarnText.setVisible(true);
+            } else {
+                spentTodayText.setVisible(true);
+                spentTodayWarnText.setVisible(false);
+                monthLimitWarnText.setVisible(false);
+            }
+        }else{
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Input error");
+            alert.setHeaderText(null);
+            alert.setContentText("Invalid value selected. Select one of the suggested values.");
+            alert.getDialogPane().getStylesheets().add(Main.class.getResource("alert.css").toExternalForm());
+            alert.showAndWait();
+        }
     }
 
     @FXML
@@ -420,4 +844,67 @@ public class MainWindowController implements Initializable{
         appInfo.setResizable(false);
     }
 
+    private void changeRadioButtonEvent() {
+        expensesByTime.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
+            @Override
+            public void changed(ObservableValue<? extends Toggle> ov, Toggle old_toggle, Toggle new_toggle) {
+                if (expensesByTime.getSelectedToggle() != null) {
+                    System.out.println("State of other radio buttons:");
+                    System.out.println("byDaysRadioButton: " + byDaysRadioButton.isSelected());
+                    System.out.println("byMonthsRadioButton: " + byMonthsRadioButton.isSelected());
+                    System.out.println("byYearsRadioButton: " + byYearsRadioButton.isSelected());
+
+                    //barchart piechart
+                    barChartSeries.getData().clear();
+                    pieChartData.clear();
+                    if(byDaysRadioButton.isSelected()){
+                        for(int i = 0; i < dateExpensesList.length; i++){
+                            barChartSeries.getData().add(new XYChart.Data("" + (i + 1), dateExpensesList[i]));
+                        }
+                        for(int i = 0; i < dayCategoriesList.length; i++){
+                            String buffCategoryString = switch (i){
+                                case 0 -> "Products";
+                                case 1 -> "Travel";
+                                case 2 -> "Entertainment";
+                                case 3 -> "Transport";
+                                case 4 -> "Technologies";
+                                default -> "Other";
+                            };
+                            pieChartData.add(new PieChart.Data(buffCategoryString, dayCategoriesList[i]));
+                        }
+                    }else if(byMonthsRadioButton.isSelected()){
+                        for(int i = 0; i < monthExpensesList.length; i++){
+                            barChartSeries.getData().add(new XYChart.Data(Month.of(i + 1).name().substring(0, 3) , monthExpensesList[i]));
+                        }
+                        for(int i = 0; i < monthCategoriesList.length; i++){
+                            String buffCategoryString = switch (i){
+                                case 0 -> "Products";
+                                case 1 -> "Travel";
+                                case 2 -> "Entertainment";
+                                case 3 -> "Transport";
+                                case 4 -> "Technologies";
+                                default -> "Other";
+                            };
+                            pieChartData.add(new PieChart.Data(buffCategoryString, monthCategoriesList[i]));
+                        }
+                    }else if(byYearsRadioButton.isSelected()){
+                        for(int i = 0; i<yearExpensesList.length; i++){
+                            barChartSeries.getData().add(new XYChart.Data("" + (2020 + i), yearExpensesList[i]));
+                        }
+                        for(int i = 0; i < yearCategoriesList.length; i++){
+                            String buffCategoryString = switch (i){
+                                case 0 -> "Products";
+                                case 1 -> "Travel";
+                                case 2 -> "Entertainment";
+                                case 3 -> "Transport";
+                                case 4 -> "Technologies";
+                                default -> "Other";
+                            };
+                            pieChartData.add(new PieChart.Data(buffCategoryString, yearCategoriesList[i]));
+                        }
+                    }
+                }
+            }
+        });
+    }
 }

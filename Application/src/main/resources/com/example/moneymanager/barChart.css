@@ -1,0 +1,15 @@
+.chart-bar {
+    -fx-bar-fill: red;
+    -fx-pref-width: 30px;
+    -fx-bar-border-width: 5px;
+}
+.bar-chart {
+    -fx-bar-fill: blue;
+    -fx-pref-width: 30px;
+    -fx-bar-border-width: 5px;
+}
+.default-color0-bar {
+    -fx-bar-fill: blue;
+    -fx-pref-width: 30px;
+    -fx-bar-border-width: 5px;
+}

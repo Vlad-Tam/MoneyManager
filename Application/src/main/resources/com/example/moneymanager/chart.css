@@ -10,7 +10,7 @@
 }
 .chart-legend {
     -fx-background-color: #000000;
-    -fx-font-size: 14px;
+    -fx-font-size: 16px;
 }
 
 .chart-legend-item-symbol {
